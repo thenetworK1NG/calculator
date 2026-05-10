@@ -7,5 +7,9 @@
   { "id": "6", "label": "DVapeOrange", "file": "6.png" },
   { "id": "7", "label": "VaperCartrage", "file": "7.png" },
   { "id": "8", "label": "DabWax", "file": "8.png" },
-  { "id": "9", "label": "brownie", "file": "9.png" }
+  { "id": "9", "label": "brownie", "file": "9.png" },
+  { "id": "10", "label": "chokchip", "file": "10.png" },
+  { "id": "11", "label": "ginger", "file": "11.png" },
+  { "id": "12", "label": "lolipop", "file": "12.png" },
+  { "id": "13", "label": "gummies", "file": "13.png" }
 ]
