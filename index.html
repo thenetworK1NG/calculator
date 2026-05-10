@@ -18,6 +18,17 @@
 
   <!-- ══════════════════ CALCULATOR ══════════════════ -->
   <div id="calcView" class="calc-view">
+    <div class="calc-topbar">
+      <button id="calcInstallBtn" class="calc-install-btn" hidden aria-label="Install app">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Install
+      </button>
+    </div>
     <div class="calc-display">
       <div id="calcExpression" class="calc-expression"></div>
       <div id="calcResult" class="calc-result">0</div>
@@ -55,6 +66,13 @@
     </div>
   </div>
 
+  <!-- ══════════════════ GLITCH OVERLAY ══════════════════ -->
+  <div id="glitchOverlay" class="glitch-overlay" hidden aria-hidden="true">
+    <canvas id="glitchCanvas" class="glitch-canvas"></canvas>
+    <div class="glitch-lines" id="glitchLines"></div>
+    <div class="glitch-text" id="glitchText">4:20</div>
+  </div>
+
   <!-- ══════════════════ MENU VIEW ══════════════════ -->
   <div id="menuView" hidden>
 
@@ -67,73 +85,78 @@
       </button>
       <div class="header-right">
         <span class="live-badge" aria-label="Live data">● Live</span>
-        <button id="installBtn" class="install-btn" hidden aria-label="Install app">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+        <button id="filterToggleBtn" class="filter-toggle-btn" aria-label="Toggle filters" aria-expanded="true">
+          <svg id="filterToggleIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
+            <line x1="4" y1="6"  x2="20" y2="6"/>
+            <line x1="8" y1="12" x2="20" y2="12"/>
+            <line x1="12" y1="18" x2="20" y2="18"/>
           </svg>
-          Install
         </button>
       </div>
     </header>
 
     <main class="app-main">
 
-      <div class="search-bar-wrap">
-        <div class="search-bar">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input id="menuSearch" type="search" class="search-input"
-                 placeholder="Search by name…" autocomplete="off" spellcheck="false">
-          <button type="button" id="searchClearBtn" class="search-clear-btn" hidden aria-label="Clear search">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+      <div id="menuFilters" class="menu-filters">
+        <div class="menu-filters-inner">
+
+          <div class="search-bar-wrap">
+          <div class="search-bar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                  stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
+            <input id="menuSearch" type="search" class="search-input"
+                   placeholder="Search by name…" autocomplete="off" spellcheck="false">
+            <button type="button" id="searchClearBtn" class="search-clear-btn" hidden aria-label="Clear search">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <button class="filter-btn active" data-cat="all">All</button>
+          <button class="filter-btn cat-weed-btn" data-cat="weed">
+            <span class="cat-dot weed"></span>Weed
+          </button>
+          <button class="filter-btn cat-edibles-btn" data-cat="edibles">
+            <span class="cat-dot edibles"></span>Edibles
+          </button>
+          <button class="filter-btn cat-vapes-btn" data-cat="vapes">
+            <span class="cat-dot vapes"></span>Vapes
+          </button>
+          <button class="filter-btn cat-joints-btn" data-cat="joints">
+            <span class="cat-dot joints"></span>Joints
+          </button>
+          <button class="filter-btn cat-dabs-btn" data-cat="dabs">
+            <span class="cat-dot dabs"></span>Dabs
           </button>
         </div>
-      </div>
 
-      <div class="filter-bar">
-        <button class="filter-btn active" data-cat="all">All</button>
-        <button class="filter-btn cat-weed-btn" data-cat="weed">
-          <span class="cat-dot weed"></span>Weed
-        </button>
-        <button class="filter-btn cat-edibles-btn" data-cat="edibles">
-          <span class="cat-dot edibles"></span>Edibles
-        </button>
-        <button class="filter-btn cat-vapes-btn" data-cat="vapes">
-          <span class="cat-dot vapes"></span>Vapes
-        </button>
-        <button class="filter-btn cat-joints-btn" data-cat="joints">
-          <span class="cat-dot joints"></span>Joints
-        </button>
-        <button class="filter-btn cat-dabs-btn" data-cat="dabs">
-          <span class="cat-dot dabs"></span>Dabs
-        </button>
-      </div>
+        <div class="filter-bar filter-bar-strain">
+          <button class="filter-btn strain-filter active" data-strain="all">Any Strain</button>
+          <button class="filter-btn strain-filter strain-f-sativa" data-strain="sativa">🌅 Sativa</button>
+          <button class="filter-btn strain-filter strain-f-indica" data-strain="indica">🌙 Indica</button>
+          <button class="filter-btn strain-filter strain-f-hybrid" data-strain="hybrid">⚡ Hybrid</button>
+          <button class="filter-btn strain-filter strain-f-sativa-hybrid" data-strain="sativa-hybrid">🌅⚡ Sativa/Hybrid</button>
+          <button class="filter-btn strain-filter strain-f-indica-hybrid" data-strain="indica-hybrid">🌙⚡ Indica/Hybrid</button>
+        </div>
 
-      <div class="filter-bar filter-bar-strain">
-        <button class="filter-btn strain-filter active" data-strain="all">Any Strain</button>
-        <button class="filter-btn strain-filter strain-f-sativa" data-strain="sativa">🌅 Sativa</button>
-        <button class="filter-btn strain-filter strain-f-indica" data-strain="indica">🌙 Indica</button>
-        <button class="filter-btn strain-filter strain-f-hybrid" data-strain="hybrid">⚡ Hybrid</button>
-        <button class="filter-btn strain-filter strain-f-sativa-hybrid" data-strain="sativa-hybrid">🌅⚡ Sativa/Hybrid</button>
-        <button class="filter-btn strain-filter strain-f-indica-hybrid" data-strain="indica-hybrid">🌙⚡ Indica/Hybrid</button>
-      </div>
+        <div class="filter-bar filter-bar-tags">
+          <button class="filter-btn tag-filter active" data-tag="all">Any Type</button>
+          <button class="filter-btn tag-filter" data-tag="tunnel">🚇 Tunnel</button>
+          <button class="filter-btn tag-filter" data-tag="indoor">🏠 Indoor</button>
+          <button class="filter-btn tag-filter" data-tag="exotic-greenhouse">✨ Exotic GH</button>
+          <button class="filter-btn tag-filter" data-tag="greenhouse">🏡 Greenhouse</button>
+          <button class="filter-btn tag-filter" data-tag="outdoor">☀ Outdoor</button>
+        </div>
 
-      <div class="filter-bar filter-bar-tags">
-        <button class="filter-btn tag-filter active" data-tag="all">Any Type</button>
-        <button class="filter-btn tag-filter" data-tag="tunnel">🚇 Tunnel</button>
-        <button class="filter-btn tag-filter" data-tag="indoor">🏠 Indoor</button>
-        <button class="filter-btn tag-filter" data-tag="exotic-greenhouse">✨ Exotic GH</button>
-        <button class="filter-btn tag-filter" data-tag="greenhouse">🏡 Greenhouse</button>
-        <button class="filter-btn tag-filter" data-tag="outdoor">☀ Outdoor</button>
-      </div>
+        </div><!-- /.menu-filters-inner -->
+      </div><!-- /#menuFilters -->
 
       <div class="menu-count-bar">
         <span id="menuCount" class="menu-count-label">Loading…</span>

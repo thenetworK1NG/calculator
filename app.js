@@ -25,21 +25,25 @@ if ('serviceWorker' in navigator) {
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredInstall = e;
-  document.getElementById('installBtn').hidden = false;
+  document.getElementById('calcInstallBtn').hidden = false;
 });
 
 window.addEventListener('appinstalled', () => {
-  document.getElementById('installBtn').hidden = true;
+  document.getElementById('calcInstallBtn').hidden = true;
   deferredInstall = null;
 });
 
-document.getElementById('installBtn').addEventListener('click', async () => {
+async function triggerInstall() {
   if (!deferredInstall) return;
   deferredInstall.prompt();
   const { outcome } = await deferredInstall.userChoice;
-  if (outcome === 'accepted') document.getElementById('installBtn').hidden = true;
+  if (outcome === 'accepted') {
+    document.getElementById('calcInstallBtn').hidden = true;
+  }
   deferredInstall = null;
-});
+}
+
+document.getElementById('calcInstallBtn').addEventListener('click', triggerInstall);
 
 /* ─── Calculator ─────────────────────────────────────────── */
 let calcCurrent = '0';
@@ -158,15 +162,126 @@ document.querySelectorAll('.calc-btn').forEach(btn => {
   });
 });
 
-/* ─── Unlock / Lock ──────────────────────────────────────── */
-function unlockMenu() {
-  document.getElementById('calcView').hidden = true;
-  document.getElementById('menuView').hidden = false;
-  calcClear();
-  if (!menuBooted) {
-    menuBooted = true;
-    bootMenu();
+/* ─── Glitch Transition ────────────────────────────────────── */
+const PARTICLE_ICONS = ['icons/1.png','icons/2.png','icons/3.png','icons/4.png',
+                        'icons/5.png','icons/6.png','icons/7.png','icons/8.png','icons/9.png'];
+
+function spawnParticle(container) {
+  const el = document.createElement('img');
+  el.className = 'glitch-leaf';
+  el.src = PARTICLE_ICONS[Math.floor(Math.random() * PARTICLE_ICONS.length)];
+  el.alt = '';
+  el.draggable = false;
+  const size = 40 + Math.random() * 60;  /* 40–100 px */
+  el.style.width  = size + 'px';
+  el.style.height = size + 'px';
+  el.style.left   = (5 + Math.random() * 90) + 'vw';
+  el.style.top    = (5 + Math.random() * 90) + 'vh';
+  el.style.setProperty('--dx',  (Math.random() * 180 - 90) + 'px');
+  el.style.setProperty('--dy',  (Math.random() * 180 - 90) + 'px');
+  el.style.setProperty('--rot', (Math.random() * 360) + 'deg');
+  el.style.animationDuration = (0.55 + Math.random() * 0.55) + 's';
+  container.appendChild(el);
+  el.addEventListener('animationend', () => el.remove(), { once: true });
+}
+
+function runGlitchTransition(onDone) {
+  const overlay = document.getElementById('glitchOverlay');
+  const canvas  = document.getElementById('glitchCanvas');
+  const lines   = document.getElementById('glitchLines');
+  const text    = document.getElementById('glitchText');
+  const ctx     = canvas.getContext('2d');
+
+  overlay.hidden = false;
+  overlay.style.opacity  = '';
+  overlay.style.transition = '';
+  overlay.className = 'glitch-overlay active';
+
+  /* size canvas to screen */
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  /* spawn icon particles */
+  for (let i = 0; i < 22; i++) {
+    setTimeout(() => spawnParticle(overlay), i * 35);
   }
+
+  /* glitch scanlines */
+  lines.innerHTML = '';
+  for (let i = 0; i < 14; i++) {
+    const ln = document.createElement('div');
+    ln.className = 'glitch-line';
+    ln.style.top    = Math.random() * 100 + '%';
+    ln.style.height = (2 + Math.random() * 18) + 'px';
+    ln.style.animationDelay = (Math.random() * 0.6) + 's';
+    lines.appendChild(ln);
+  }
+
+  /* canvas noise bursts */
+  let frame = 0;
+  const totalFrames = 38;
+  function drawNoise() {
+    if (frame >= totalFrames) { ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const count = Math.floor(60 + Math.random() * 120);
+    for (let i = 0; i < count; i++) {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      const w = 4 + Math.random() * 80;
+      const h = 2 + Math.random() * 8;
+      const g = Math.floor(40 + Math.random() * 215);
+      ctx.fillStyle = `rgba(${Math.floor(Math.random()*30)},${g},${Math.floor(Math.random()*60)},${0.18 + Math.random() * 0.55})`;
+      ctx.fillRect(x, y, w, h);
+    }
+    if (Math.random() > 0.45) {
+      const sy = Math.random() * canvas.height;
+      const sh = 4 + Math.random() * 40;
+      const shift = (Math.random() * 60 - 30);
+      try { const imgData = ctx.getImageData(0, sy, canvas.width, sh);
+            ctx.putImageData(imgData, shift, sy); } catch(e) {}
+    }
+    frame++;
+    requestAnimationFrame(drawNoise);
+  }
+  drawNoise();
+
+  /* Show 4:20 text mid-way */
+  setTimeout(() => { text.classList.add('visible'); }, 260);
+  setTimeout(() => { text.classList.remove('visible'); }, 620);
+
+  /* At 820ms: reveal menu behind overlay, then cross-fade overlay out */
+  setTimeout(() => {
+    onDone();  /* show menuView, hide calcView — sits behind overlay */
+    overlay.style.transition = 'opacity 0.6s ease';
+    overlay.style.opacity    = '0';
+    setTimeout(() => {
+      overlay.hidden = true;
+      overlay.style.transition = '';
+      overlay.style.opacity    = '';
+      overlay.className = 'glitch-overlay';
+      lines.innerHTML   = '';
+    }, 620);
+  }, 820);
+}
+
+/* ─── Unlock / Lock ──────────────────────────────────────── */
+function requestFullscreen() {
+  const el = document.documentElement;
+  const fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+  if (fn) fn.call(el).catch(() => {});
+}
+
+function unlockMenu() {
+  calcClear();
+  requestFullscreen();
+  runGlitchTransition(() => {
+    document.getElementById('calcView').hidden = true;
+    document.getElementById('menuView').hidden = false;
+    if (!menuBooted) {
+      menuBooted = true;
+      bootMenu();
+    }
+  });
 }
 
 function lockMenu() {
@@ -175,6 +290,18 @@ function lockMenu() {
 }
 
 document.getElementById('calcBackBtn').addEventListener('click', lockMenu);
+
+/* ─── Filter Toggle ─────────────────────────────────────── */
+let filtersVisible = true;
+
+document.getElementById('filterToggleBtn').addEventListener('click', () => {
+  filtersVisible = !filtersVisible;
+  const panel = document.getElementById('menuFilters');
+  const btn   = document.getElementById('filterToggleBtn');
+  panel.classList.toggle('filters-hidden', !filtersVisible);
+  btn.setAttribute('aria-expanded', String(filtersVisible));
+  btn.classList.toggle('active', !filtersVisible);
+});
 
 /* ─── Helpers ────────────────────────────────────────────── */
 function esc(str) {

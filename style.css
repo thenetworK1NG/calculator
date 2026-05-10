@@ -149,6 +149,49 @@ input  { font-family: inherit; }
   min-height: 100vh;
 }
 
+/* ─── Filter Toggle Button ─────────────────────────────────── */
+.filter-toggle-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.filter-toggle-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+}
+.filter-toggle-btn.active {
+  background: var(--accent-dim);
+  border-color: rgba(62,207,110,0.35);
+  color: var(--accent);
+}
+
+/* ─── Collapsible Filters Panel ────────────────────────────── */
+.menu-filters {
+  display: grid;
+  grid-template-rows: 1fr;
+  overflow: hidden;
+  transition: grid-template-rows 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.28s ease;
+  opacity: 1;
+}
+.menu-filters.filters-hidden {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+.menu-filters-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
 /* ─── Search Bar ───────────────────────────────────────────── */
 .search-bar-wrap {
   padding: 14px 16px 0;
@@ -757,6 +800,156 @@ input  { font-family: inherit; }
   transition: background 0.15s;
 }
 .calc-back-btn:hover { background: rgba(255,255,255,0.16); }
+
+/* ─── Calc Top Bar & Install Button ────────────────────────── */
+.calc-topbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 14px 18px 0;
+  min-height: 44px;
+}
+
+.calc-install-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.75);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.calc-install-btn:hover {
+  background: rgba(255,255,255,0.13);
+  color: #fff;
+  border-color: rgba(255,255,255,0.3);
+}
+
+/* ─── Glitch Overlay ───────────────────────────────────────── */
+.glitch-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  pointer-events: none;
+  opacity: 0;
+  background: #000;
+}
+.glitch-overlay.active {
+  opacity: 1;
+  animation: glitchFlash 0.9s steps(1) forwards;
+}
+
+@keyframes glitchFlash {
+  0%   { background: #000; opacity: 1; }
+  6%   { background: #001a00; }
+  12%  { background: #000; }
+  18%  { background: rgba(0,80,20,0.95); }
+  22%  { background: #000; }
+  32%  { background: rgba(0,60,10,0.9); }
+  40%  { background: #000; }
+  52%  { background: rgba(10,40,5,0.95); }
+  65%  { background: #000; }
+  80%  { background: rgba(0,30,5,0.85); }
+  100% { background: #000; opacity: 1; }
+}
+
+/* Noise canvas sits on top */
+.glitch-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: screen;
+}
+
+/* Scanline container */
+.glitch-lines {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.glitch-line {
+  position: absolute;
+  left: 0; right: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(62,207,110,0.55) 20%,
+    rgba(100,255,120,0.75) 50%,
+    rgba(62,207,110,0.55) 80%,
+    transparent 100%);
+  animation: lineSweep 0.25s ease-in-out forwards;
+  transform: translateX(-110%);
+}
+@keyframes lineSweep {
+  0%   { transform: translateX(-110%); opacity: 1; }
+  70%  { transform: translateX(20%);   opacity: 1; }
+  100% { transform: translateX(110%);  opacity: 0; }
+}
+
+/* 4:20 text flash */
+.glitch-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 6rem;
+  font-weight: 900;
+  letter-spacing: -2px;
+  color: #3ecf6e;
+  text-shadow:
+    0 0 20px rgba(62,207,110,0.9),
+    0 0 60px rgba(62,207,110,0.6),
+    4px 0 0 rgba(255,0,80,0.6),
+    -4px 0 0 rgba(0,200,255,0.6);
+  opacity: 0;
+  transform: scale(0.85) skewX(-4deg);
+  transition: opacity 0.07s, transform 0.07s;
+  pointer-events: none;
+  user-select: none;
+}
+.glitch-text.visible {
+  opacity: 1;
+  transform: scale(1.08) skewX(-2deg);
+  animation: textGlitch 0.36s steps(2) forwards;
+}
+@keyframes textGlitch {
+  0%   { text-shadow: 0 0 20px rgba(62,207,110,0.9), 0 0 60px rgba(62,207,110,0.6),  8px 0 0 rgba(255,0,80,0.8), -8px 0 0 rgba(0,200,255,0.8); }
+  25%  { text-shadow: 0 0 20px rgba(62,207,110,0.9), 0 0 60px rgba(62,207,110,0.6), -8px 0 0 rgba(255,0,80,0.8),  8px 0 0 rgba(0,200,255,0.8); }
+  50%  { text-shadow: 0 0 30px rgba(62,207,110,1),   0 0 80px rgba(62,207,110,0.9),  4px 0 0 rgba(255,0,80,0.5), -4px 0 0 rgba(0,200,255,0.5); }
+  75%  { text-shadow: 0 0 20px rgba(62,207,110,0.9), 0 0 60px rgba(62,207,110,0.6), -4px 0 0 rgba(255,0,80,0.6),  4px 0 0 rgba(0,200,255,0.6); }
+  100% { text-shadow: 0 0 20px rgba(62,207,110,0.9), 0 0 60px rgba(62,207,110,0.6),  2px 0 0 rgba(255,0,80,0.4), -2px 0 0 rgba(0,200,255,0.4); }
+}
+
+/* Floating icon particles */
+.glitch-leaf {
+  position: absolute;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: 8px;
+  filter: drop-shadow(0 0 10px rgba(62,207,110,0.75))
+          drop-shadow(0 0 24px rgba(62,207,110,0.45))
+          brightness(1.1);
+  animation: leafBurst 0.75s ease-out forwards;
+  will-change: transform, opacity;
+}
+@keyframes leafBurst {
+  0%   { opacity: 0;   transform: translate(0,0) scale(0.3) rotate(0deg); }
+  20%  { opacity: 1; }
+  80%  { opacity: 0.7; }
+  100% { opacity: 0;   transform: translate(var(--dx), var(--dy)) scale(1.2) rotate(var(--rot, 120deg)); }
+}
+
 @media (min-width: 768px) {
   .stock-grid { display: grid; grid-template-columns: repeat(2, 1fr); }
 }
